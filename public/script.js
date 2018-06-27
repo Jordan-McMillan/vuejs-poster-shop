@@ -6,24 +6,51 @@ Vue.filter('currency', (value) => {
 new Vue({
     el: '#app',
     data: {
+        searchTerm: '',
         total: 0,
-        items: [
-            { id: 1, title: 'something 1', price: 3.22},
-            { id: 2, title: 'something 2', price: 4.33},
-            { id: 3, title: 'something 3', price: 5.44}
-        ],
+        items: [],
         cart: []
     },
     methods: {
+        onSubmit() {
+            var me = this;
+            axios.get('/search/' + this.searchTerm)
+                .then(response => {
+                    var searchResults = response.data;
+                    me.items = searchResults;
+                    me.items.map(item => {
+                        item.price = 0.99;
+                    });
+                });
+        },
+        increment(item) {
+            item.qty++;
+        },
+        decrement(item) {
+            item.qty--;
+
+            if (item.qty <= 0) {
+                var cartItemIndex = -1;
+                for (var i = 0; i < this.cart.length; i++) {
+                    if (this.cart[i].id === item.id) {
+                        cartItemIndex = i;
+                        break;
+                    }
+                }
+                if (cartItemIndex > -1)
+                    this.cart.splice(cartItemIndex, 1);
+            }
+        },
         addToCart(index) {
             var item = this.items[index];
 
             var cartItem = null;
 
-            for(var i = 0; i < this.cart.length; i++) {
+            for (var i = 0; i < this.cart.length; i++) {
                 if (this.cart[i].id === item.id) {
                     cartItem = this.cart[i];
                     cartItem.qty++;
+                    break;
                 }
             }
 
