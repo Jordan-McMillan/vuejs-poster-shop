@@ -6,21 +6,27 @@ Vue.filter('currency', (value) => {
 new Vue({
     el: '#app',
     data: {
-        searchTerm: '',
+        newSearchTerm: 'anime',
+        lastSearchTerm: '',
         total: 0,
         items: [],
-        cart: []
+        cart: [],
+        loading: false
     },
     methods: {
         onSubmit() {
             var me = this;
-            axios.get('/search/' + this.searchTerm)
+            me.items = [];
+            me.loading = true;
+            axios.get('/search/' + this.newSearchTerm)
                 .then(response => {
                     var searchResults = response.data;
                     me.items = searchResults;
                     me.items.map(item => {
                         item.price = 0.99;
                     });
+                    me.lastSearchTerm = me.newSearchTerm;
+                    me.loading = false;
                 });
         },
         increment(item) {
@@ -66,5 +72,8 @@ new Vue({
 
             this.total += item.price;
         }
+    },
+    mounted() {
+        this.onSubmit();
     }
 });
